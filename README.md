@@ -22,8 +22,6 @@ npm install --save ff2005/redux-async-effects
 
 ### /Store/index.js
 ```js
-/* @flow */
-
 import { createStore, applyMiddleware, compose } from 'redux'
 import createAsyncEffectMiddleware from 'redux-async-effects'
 import effectLogger from 'redux-async-effects-logger'
@@ -32,10 +30,10 @@ import { createLogger } from 'redux-logger'
 
 import { ApplicationAction } from '../Redux/ApplicationRedux'
 
-export default (rootReducer: Function, rootEffects: Function) => {
+export default (rootReducer, rootEffects) => {
   const middleware = []
   const enhancers = []
-  const reducers = (state: any = {}, action: any) => {
+  const reducers = (state, action) => {
     return (rootReducer(state, action))
   }
 
@@ -67,8 +65,6 @@ export default (rootReducer: Function, rootEffects: Function) => {
 
 ### /Redux/index.js
 ```js
-/* @flow */
-
 import { persistCombineReducers } from 'redux-persist'
 import storage from 'redux-persist/es/storage'
 import { combineEffects } from 'redux-async-effects'
@@ -101,20 +97,13 @@ export default () => {
 
 ### /Redux/ApplicationRedux.js
 ```js
-/* @flow */
-
 import Immutable from 'seamless-immutable'
 import { createReducer, createEffect } from 'redux-async-effects'
 import { startup, increment } from '../Effects/ApplicationEffect'
 
 const NS = 'application'
 
-type ApplicationState = {
-  started: boolean,
-  inc: Object
-}
-
-const APPLICATION_INIT_STATE: ApplicationState = Immutable({
+const APPLICATION_INIT_STATE = Immutable({
   started: false,
   inc: {}
 })
@@ -126,12 +115,12 @@ export const ApplicationTypes = {
 }
 
 export const ApplicationSelector = {
-  inc: (index: string) => (state: Object) => (state.application.inc[index] || 0)
+  inc: (index) => (state) => (state.application.inc[index] || 0)
 }
 
 export const ApplicationAction = {
   start: () => ({ type: ApplicationTypes.START }),
-  increment: (index: string) => ({ type: ApplicationTypes.INCREMENT, index })
+  increment: (index) => ({ type: ApplicationTypes.INCREMENT, index })
 }
 
 export const ApplicationReducer = createReducer(APPLICATION_INIT_STATE, {
@@ -153,12 +142,10 @@ export const ApplicationEffect = createEffect({
 
 ### /Effects/ApplicationEffect.js
 ```js
-/* @flow */
-
 import type { Effect } from 'redux-async-effects'
 import { ApplicationTypes, ApplicationAction, ApplicationSelector } from '../Redux/ApplicationRedux'
 
-export const startup = async ({ dispatch }: Effect) => {
+export const startup = async ({ dispatch }) => {
   const a = await delay(3000)
   if (a) {
     for (let i = 0; i < 100; i++) {
@@ -169,21 +156,21 @@ export const startup = async ({ dispatch }: Effect) => {
   }
 }
 
-export const increment = async ({ action, select, dispatch }: Effect) => {
-  const index: string = action.index
+export const increment = async ({ action, select, dispatch }) => {
+  const index = action.index
   const a = await delay(1000)
   if (a) {
-    const inc: number = select(ApplicationSelector.inc(index)) + 1
+    const inc = select(ApplicationSelector.inc(index)) + 1
     dispatch({ type: ApplicationTypes.INCREMENT_SUCCESS, index, inc })
     const a = await delay(1000)
     if (a) {
-      const inc: number = select(ApplicationSelector.inc(index)) + 1
+      const inc = select(ApplicationSelector.inc(index)) + 1
       dispatch({ type: ApplicationTypes.INCREMENT_SUCCESS, index, inc })
     }
   }
 }
 
-const delay = (timeout: number = 1000) => new Promise((resolve) => {
+const delay = (timeout = 1000) => new Promise((resolve) => {
   if (timeout > 0) {
     setTimeout(() => {
       resolve(true)
@@ -196,8 +183,6 @@ const delay = (timeout: number = 1000) => new Promise((resolve) => {
 
 ### My React Native Component
 ```js
-/* @flow */
-
 import React, { Component } from 'react'
 import { View, Text, Platform, StyleSheet } from 'react-native'
 import { connect } from 'react-redux'
