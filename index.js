@@ -28,10 +28,7 @@ export function createEffect (effects, options) {
           getState,
           select,
           dispatch,
-          options: {
-            ...middlewareOptions,
-            ...options
-          }
+          options: Object.assign({}, middlewareOptions, options)
         })
       }
     }
